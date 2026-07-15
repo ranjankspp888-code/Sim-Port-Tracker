@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIM Port Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #2563eb; --bg: #f1f5f9; --text: #1e293b; --danger: #ef4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent;}
+        body { background-color: var(--bg); color: var(--text); }
+        
+        /* Splash Screen */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease-out; }
+        #splash-screen i { font-size: 5rem; margin-bottom: 15px; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+        
+        /* Login Screen */
+        #login-screen { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .login-box { background: white; width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .login-box i { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
+        .login-box h2 { margin-bottom: 5px; color: var(--text); }
+        .login-box p { font-size: 0.9rem; color: #64748b; margin-bottom: 25px; }
+        .login-box input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 15px; font-size: 1rem; text-align: center; font-family: 'Poppins'; }
+        .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+
+        /* Custom Alert Pop-up */
+        .custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .custom-alert-box { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .custom-alert-box h4 { margin: 10px 0; font-size: 1.2rem; }
+        .custom-alert-box p { color: #64748b; font-size: 0.9rem; margin-bottom: 20px; }
+        .alert-btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; width: 100%; }
+        .alert-btn-cancel { background: #e2e8f0; color: #475569; margin-top: 10px; }
+
+        /* Install Banner */
+        #install-banner { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 9998; display: none; align-items: center; justify-content: space-between; width: 90%; max-width: 400px; }
+        #install-banner div { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
+        #install-banner button { background: var(--primary); color: white; border: none; padding: 6px 15px; border-radius: 20px; font-weight: 600; }
+
+        /* Main App Styles */
+        #main-app { display: none; padding-bottom: 80px; }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .content-section { display: none; padding: 16px; animation: fadeIn 0.3s; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .card h3 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;}
+        .data-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem;}
+        .data-row strong { font-size: 1rem; color: #334155; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px; font-weight: 600;}
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family:'Poppins'; font-size: 0.9rem; }
+        .app-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;}
+        .app-btn:disabled { background: #94a3b8; }
+        .btn-danger { background: var(--danger); }
+        .btn-row { display: flex; gap: 10px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-radius: 20px 20px 0 0; z-index: 1000;}
+        .nav-item { cursor: pointer; color: #94a3b8; text-align: center; font-size: 0.8rem;}
+        .nav-item i { font-size: 1.2rem; display:block; margin-bottom:4px; }
+        .nav-item.active { color: var(--primary); }
+
+        #loading { text-align: center; padding: 20px; font-weight: 600; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash-screen">
+    <i class="fa-solid fa-sim-card"></i>
+    <h2>SIM Tracker</h2>
+    <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;"></p>
+</div>
+
+<!-- Login Screen -->
+<div id="login-screen">
+    <div class="login-box">
+        <i class="fa-solid fa-user-shield"></i>
+        <h2>Welcome Back</h2>
+        <p>Enter your mobile number to access your account securely.</p>
+        <input type="number" id="loginPhone" placeholder="Enter 10 digit number">
+        <button onclick="handleLogin()">Login to Account</button>
+    </div>
+</div>
+
+<!-- Custom Alerts & Banners -->
+<div id="install-banner">
+    <div><i class="fa-solid fa-download" style="color: var(--primary);"></i> Add App to Home Screen</div>
+    <button id="installBtn">Install</button>
+</div>
+
+<div class="custom-alert-overlay" id="customAlertOverlay">
+    <div class="custom-alert-box">
+        <i id="alertIcon" class="fa-solid fa-circle-check" style="font-size: 3rem; color: #10b981;"></i>
+        <h4 id="alertTitle">Success</h4>
+        <p id="alertMessage">Action completed successfully.</p>
+        <button class="alert-btn" onclick="closeAlert()" id="alertOkBtn">OK</button>
+        <button class="alert-btn alert-btn-cancel" onclick="closeConfirm()" id="alertCancelBtn" style="display: none;">Cancel</button>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+    <header><h1>SIM Port Tracker</h1></header>
+
+    <main id="home" class="content-section active">
+        <div id="loading">Syncing Data... <i class="fa fa-spinner fa-spin"></i></div>
+        <div id="sim-cards-container"></div>
+    </main>
+
+    <main id="refer" class="content-section">
+        <div class="card" style="text-align: center;">
+            <i class="fa-solid fa-gift" style="font-size: 3rem; color: #10b981; margin-bottom: 15px;"></i>
+            <h3 style="justify-content: center; border-bottom: none; margin-bottom: 5px;">Refer & Earn</h3>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Share this app with friends!</p>
+            <button class="app-btn" onclick="shareApp()"><i class="fa-solid fa-share-nodes"></i> Share App Link</button>
+        </div>
+    </main>
+
+    <main id="more" class="content-section">
+        <div class="card">
+            <h3><i class="fa fa-plus-circle" style="color: #10b981;"></i> Add New SIM</h3>
+            <div class="form-group"><label>Provider</label><select id="addProvider"><option value="Airtel">Airtel</option><option value="Jio">Jio</option><option value="Vi">Vi</option><option value="BSNL">BSNL</option></select></div>
+            <div class="form-group"><label>Mobile Number</label><input type="text" id="addMobile" placeholder="e.g. 9876543210"></div>
+            <!-- Changed Last Recharge to First Recharge -->
+            <div class="form-group"><label>First Recharge Date</label><input type="date" id="addDate"></div>
+            <button class="app-btn" id="addBtn" onclick="addNumber()"><i class="fa fa-plus"></i> Add Number</button>
+        </div>
+        <div class="card">
+            <h3><i class="fa fa-pen-to-square" style="color: var(--primary);"></i> Edit or Delete</h3>
+            <div class="form-group"><label>Select Saved Number</label><select id="manageSelector" onchange="populateEditForm()"></select></div>
+            <div class="form-group"><label>Provider</label><select id="editProvider"><option value="Airtel">Airtel</option><option value="Jio">Jio</option><option value="Vi">Vi</option><option value="BSNL">BSNL</option></select></div>
+            <div class="form-group"><label>Mobile Number</label><input type="text" id="editMobile"></div>
+            <!-- Changed Last Recharge to First Recharge -->
+            <div class="form-group"><label>First Recharge Date</label><input type="date" id="editDate"></div>
+            <div class="btn-row">
+                <button class="app-btn" id="saveBtn" onclick="updateNumber()" style="flex: 1;"><i class="fa fa-save"></i> Save</button>
+                <button class="app-btn btn-danger" id="deleteBtn" onclick="askDeleteNumber()" style="flex: 1;"><i class="fa fa-trash"></i> Delete</button>
+            </div>
+        </div>
+        <button class="app-btn" onclick="handleLogout()" style="background: #e2e8f0; color: #475569; margin-top: 20px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showTab('home', this)"><i class="fa fa-house"></i> Home</div>
+        <div class="nav-item" onclick="showTab('refer', this)"><i class="fa fa-gift"></i> Refer</div>
+        <div class="nav-item" onclick="showTab('more', this)"><i class="fa fa-gear"></i> Manage</div>
+    </nav>
+</div>
+
+<script>
+    // -----------------------------------------------------
+    // YAHAN APNA GOOGLE APP SCRIPT URL DALEIN 👇
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYY6ZzVsFZRgtGmr-TNXdkKgwIRb23x2xjWiOQJUtrPKHJGqzrEbLQtIkajYx6Gee5Kw/exec"; 
+    // -----------------------------------------------------
+
+    let simData = []; 
+    let currentlyEditingMobile = ""; 
+    let confirmCallback = null;
+    let userId = localStorage.getItem("sim_tracker_account");
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                if(userId) { document.getElementById('main-app').style.display = 'block'; loadDataFromSheet(); } 
+                else { document.getElementById('login-screen').style.display = 'flex'; }
+            }, 500);
+        }, 2000); 
+    });
+
+    function handleLogin() {
+        let phone = document.getElementById('loginPhone').value;
+        if(phone.length >= 10) {
+            userId = phone; localStorage.setItem("sim_tracker_account", phone);
+            document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'block';
+            loadDataFromSheet(); customAlert("Welcome", "Logged in successfully!", "success");
+        } else { customAlert("Invalid Input", "Please enter a valid 10-digit mobile number.", "error"); }
+    }
+
+    function handleLogout() {
+        customConfirm("Logout", "Are you sure you want to log out?", function() { localStorage.removeItem("sim_tracker_account"); location.reload(); });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').style.display = 'flex'; });
+    document.getElementById('installBtn').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('install-banner').style.display = 'none'; } deferredPrompt = null; } });
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e=>{}); }
+
+    function customAlert(title, message, type) { document.getElementById('customAlertOverlay').style.display = 'flex'; document.getElementById('alertTitle').innerText = title; document.getElementById('alertMessage').innerText = message; document.getElementById('alertCancelBtn').style.display = 'none'; let icon = document.getElementById('alertIcon'); if(type === 'success') { icon.className = "fa-solid fa-circle-check"; icon.style.color = "#10b981"; } else if(type === 'error') { icon.className = "fa-solid fa-circle-xmark"; icon.style.color = "#ef4444"; } else if(type === 'warning') { icon.className = "fa-solid fa-triangle-exclamation"; icon.style.color = "#f59e0b"; } }
+    function customConfirm(title, message, callback) { customAlert(title, message, 'warning'); document.getElementById('alertCancelBtn').style.display = 'inline-block'; confirmCallback = callback; }
+    function closeAlert() { document.getElementById('customAlertOverlay').style.display = 'none'; if(confirmCallback) { confirmCallback(); confirmCallback = null; } }
+    function closeConfirm() { document.getElementById('customAlertOverlay').style.display = 'none'; confirmCallback = null; }
+    function showTab(id, el) { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
+    function shareApp() { if (navigator.share) { navigator.share({ title: 'SIM Tracker', text: 'Track SIM Port easily!', url: window.location.href }).catch(e=>{}); } else { navigator.clipboard.writeText(window.location.href).then(() => customAlert("Copied", "App link copied!", "success")); } }
+
+    function parseToStandardDate(dateStr) {
+        if (!dateStr) return new Date();
+        if (dateStr.includes('T')) return dateStr.split('T')[0]; 
+        if (dateStr.indexOf('-') === 2) {
+            let p = dateStr.split('-');
+            return `${p[2]}-${p[1]}-${p[0]}`; 
+        }
+        return dateStr; 
+    }
+
+    function loadDataFromSheet() {
+        document.getElementById('loading').style.display = 'block'; document.getElementById('sim-cards-container').innerHTML = '';
+        fetch(`${SCRIPT_URL}?userId=${userId}`).then(res => res.json()).then(data => { simData = data; document.getElementById('loading').style.display = 'none'; renderDashboard(); populateManageDropdown(); }).catch(err => document.getElementById('loading').innerHTML = "Error loading data!");
+    }
+
+    function renderDashboard() {
+        const container = document.getElementById('sim-cards-container'); container.innerHTML = '';
+        if (simData.length === 0) { container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:20px;">No numbers saved in your account.</p>`; return; }
+        
+        let sortedData = [...simData].sort((a, b) => {
+            let stdA = parseToStandardDate(a.date);
+            let stdB = parseToStandardDate(b.date);
+            let diffA = Math.floor((new Date() - new Date(stdA)) / (1000 * 60 * 60 * 24));
+            let diffB = Math.floor((new Date() - new Date(stdB)) / (1000 * 60 * 60 * 24));
+            let eligibleA = diffA >= 90 ? 1 : 0;
+            let eligibleB = diffB >= 90 ? 1 : 0;
+            
+            if (eligibleA === eligibleB) return diffB - diffA;
+            return eligibleB - eligibleA;
+        });
+
+        sortedData.forEach(item => {
+            let stdDate = parseToStandardDate(item.date); 
+            let diffDays = Math.floor((new Date() - new Date(stdDate)) / (1000 * 60 * 60 * 24)); 
+            let isEligible = diffDays >= 90;
+            
+            let dParts = stdDate.split('-');
+            let beautifulDate = `${dParts[2]}-${dParts[1]}-${dParts[0]}`; 
+
+            // Changed "Last Recharge:" to "First Recharge:" in the dashboard card
+            container.innerHTML += `<div class="card" style="${isEligible ? 'border-left: 5px solid #16a34a;' : 'border-left: 5px solid #ef4444;'}"><div class="data-row"><strong><i class="fa-solid fa-sim-card"></i> ${item.provider} SIM</strong></div><div class="data-row"><span>Number:</span> <span style="font-weight:600;">${item.mobile}</span></div><div class="data-row"><span>First Recharge:</span> <span>${beautifulDate}</span></div><div class="data-row"><span>Days Passed:</span> <span>${diffDays} Days</span></div><div class="data-row"><span class="badge" style="background:${isEligible?'#dcfce3':'#fee2e2'}; color:${isEligible?'#16a34a':'#ef4444'}">${isEligible ? '<i class="fa fa-check-circle"></i> Eligible' : '<i class="fa fa-clock"></i> Wait ' + (90-diffDays) + ' Days'}</span></div></div>`;
+        });
+    }
+
+    function populateManageDropdown() {
+        const selector = document.getElementById('manageSelector'); selector.innerHTML = simData.length === 0 ? '<option value="">No numbers</option>' : '';
+        simData.forEach(item => selector.innerHTML += `<option value="${item.mobile}">${item.provider} - ${item.mobile}</option>`); populateEditForm();
+    }
+
+    function populateEditForm() {
+        currentlyEditingMobile = document.getElementById('manageSelector').value; let data = simData.find(i => i.mobile === currentlyEditingMobile);
+        if(data) { 
+            document.getElementById('editProvider').value = data.provider; 
+            document.getElementById('editMobile').value = data.mobile; 
+            document.getElementById('editDate').value = parseToStandardDate(data.date); 
+        }
+    }
+
+    function addNumber() {
+        let p = document.getElementById('addProvider').value, m = document.getElementById('addMobile').value, d = document.getElementById('addDate').value;
+        if(!m || !d) { customAlert("Missing Info", "Please enter Mobile and Date!", "error"); return; }
+        let btn = document.getElementById('addBtn'); btn.innerHTML = 'Adding... <i class="fa fa-spinner fa-spin"></i>'; btn.disabled = true;
+        fetch(`${SCRIPT_URL}?action=add&provider=${p}&mobile=${m}&date=${d}&userId=${userId}`).then(res => res.json()).then(res => { customAlert("Added", "New Number Added!", "success"); btn.innerHTML = '<i class="fa fa-plus"></i> Add Number'; btn.disabled = false; document.getElementById('addMobile').value = ""; loadDataFromSheet(); });
+    }
+
+    function updateNumber() {
+        if(!currentlyEditingMobile) return; let p = document.getElementById('editProvider').value, m = document.getElementById('editMobile').value, d = document.getElementById('editDate').value;
+        let btn = document.getElementById('saveBtn'); btn.innerHTML = 'Saving... <i class="fa fa-spinner fa-spin"></i>'; btn.disabled = true;
+        fetch(`${SCRIPT_URL}?action=update&oldMobile=${currentlyEditingMobile}&provider=${p}&mobile=${m}&date=${d}&userId=${userId}`).then(res => res.json()).then(res => { customAlert("Updated", "Details Updated!", "success"); btn.innerHTML = '<i class="fa fa-save"></i> Save'; btn.disabled = false; loadDataFromSheet(); document.querySelector('.nav-item').click(); });
+    }
+
+    function askDeleteNumber() {
+        if(!currentlyEditingMobile) return;
+        customConfirm("Delete Number?", `Are you sure you want to delete ${currentlyEditingMobile}?`, function() {
+            let btn = document.getElementById('deleteBtn'); btn.innerHTML = 'Deleting... <i class="fa fa-spinner fa-spin"></i>'; btn.disabled = true;
+            fetch(`${SCRIPT_URL}?action=delete&mobile=${currentlyEditingMobile}&userId=${userId}`).then(res => res.json()).then(res => { customAlert("Deleted", "Number Deleted!", "success"); btn.innerHTML = '<i class="fa fa-trash"></i> Delete'; btn.disabled = false; loadDataFromSheet(); document.querySelector('.nav-item').click(); });
+        });
+    }
+</script>
+</body>
+</html>
