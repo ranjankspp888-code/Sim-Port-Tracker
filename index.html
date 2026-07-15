@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIM Port Tracker</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#ffffff">
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #2563eb; --bg: #f1f5f9; --text: #1e293b; --danger: #ef4444; }
@@ -44,7 +44,11 @@
 
         /* Main App Styles */
         #main-app { display: none; padding-bottom: 80px; }
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Updated Header Styles (Now Sticky/Locked) */
+        header { background: white; padding: 20px; text-align: left; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        header h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        
         .content-section { display: none; padding: 16px; animation: fadeIn 0.3s; }
         .content-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -109,7 +113,13 @@
 
 <!-- MAIN APP -->
 <div id="main-app">
-    <header><h1>SIM Port Tracker</h1></header>
+    <!-- Updated Header Section -->
+    <header>
+        <h1>
+            <span style="color: #2563eb;">SimPort</span> 
+            <span style="color: #16a34a;">Tracker</span>
+        </h1>
+    </header>
 
     <main id="home" class="content-section active">
         <div id="loading">Syncing Data... <i class="fa fa-spinner fa-spin"></i></div>
@@ -130,7 +140,6 @@
             <h3><i class="fa fa-plus-circle" style="color: #10b981;"></i> Add New SIM</h3>
             <div class="form-group"><label>Provider</label><select id="addProvider"><option value="Airtel">Airtel</option><option value="Jio">Jio</option><option value="Vi">Vi</option><option value="BSNL">BSNL</option></select></div>
             <div class="form-group"><label>Mobile Number</label><input type="text" id="addMobile" placeholder="e.g. 9876543210"></div>
-            <!-- Changed Last Recharge to First Recharge -->
             <div class="form-group"><label>First Recharge Date</label><input type="date" id="addDate"></div>
             <button class="app-btn" id="addBtn" onclick="addNumber()"><i class="fa fa-plus"></i> Add Number</button>
         </div>
@@ -139,7 +148,6 @@
             <div class="form-group"><label>Select Saved Number</label><select id="manageSelector" onchange="populateEditForm()"></select></div>
             <div class="form-group"><label>Provider</label><select id="editProvider"><option value="Airtel">Airtel</option><option value="Jio">Jio</option><option value="Vi">Vi</option><option value="BSNL">BSNL</option></select></div>
             <div class="form-group"><label>Mobile Number</label><input type="text" id="editMobile"></div>
-            <!-- Changed Last Recharge to First Recharge -->
             <div class="form-group"><label>First Recharge Date</label><input type="date" id="editDate"></div>
             <div class="btn-row">
                 <button class="app-btn" id="saveBtn" onclick="updateNumber()" style="flex: 1;"><i class="fa fa-save"></i> Save</button>
@@ -242,7 +250,6 @@
             let dParts = stdDate.split('-');
             let beautifulDate = `${dParts[2]}-${dParts[1]}-${dParts[0]}`; 
 
-            // Changed "Last Recharge:" to "First Recharge:" in the dashboard card
             container.innerHTML += `<div class="card" style="${isEligible ? 'border-left: 5px solid #16a34a;' : 'border-left: 5px solid #ef4444;'}"><div class="data-row"><strong><i class="fa-solid fa-sim-card"></i> ${item.provider} SIM</strong></div><div class="data-row"><span>Number:</span> <span style="font-weight:600;">${item.mobile}</span></div><div class="data-row"><span>First Recharge:</span> <span>${beautifulDate}</span></div><div class="data-row"><span>Days Passed:</span> <span>${diffDays} Days</span></div><div class="data-row"><span class="badge" style="background:${isEligible?'#dcfce3':'#fee2e2'}; color:${isEligible?'#16a34a':'#ef4444'}">${isEligible ? '<i class="fa fa-check-circle"></i> Eligible' : '<i class="fa fa-clock"></i> Wait ' + (90-diffDays) + ' Days'}</span></div></div>`;
         });
     }
