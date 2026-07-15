@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIM Port Tracker</title>
+    
+    <!-- Standard Manifest Link for PWABuilder -->
     <link rel="manifest" href="manifest.json">
+    
+    <!-- App Icons for Chrome and Apple -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/192/sim-card.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/sim-card.png">
+    
     <meta name="theme-color" content="#ffffff">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -202,7 +209,15 @@
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').style.display = 'flex'; });
     document.getElementById('installBtn').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { document.getElementById('install-banner').style.display = 'none'; } deferredPrompt = null; } });
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e=>{}); }
+    
+    // Updated Service Worker Registration
+    if ('serviceWorker' in navigator) { 
+        navigator.serviceWorker.register('./sw.js').then(function(registration) {
+            console.log('Service Worker Registered');
+        }).catch(function(error) {
+            console.log('Service Worker Registration failed:', error);
+        });
+    }
 
     function customAlert(title, message, type) { document.getElementById('customAlertOverlay').style.display = 'flex'; document.getElementById('alertTitle').innerText = title; document.getElementById('alertMessage').innerText = message; document.getElementById('alertCancelBtn').style.display = 'none'; let icon = document.getElementById('alertIcon'); if(type === 'success') { icon.className = "fa-solid fa-circle-check"; icon.style.color = "#10b981"; } else if(type === 'error') { icon.className = "fa-solid fa-circle-xmark"; icon.style.color = "#ef4444"; } else if(type === 'warning') { icon.className = "fa-solid fa-triangle-exclamation"; icon.style.color = "#f59e0b"; } }
     function customConfirm(title, message, callback) { customAlert(title, message, 'warning'); document.getElementById('alertCancelBtn').style.display = 'inline-block'; confirmCallback = callback; }
