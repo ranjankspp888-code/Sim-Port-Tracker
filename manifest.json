@@ -8,15 +8,15 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "https://img.icons8.com/fluency/192/sim-card.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%232563eb'/%3E%3Cpath d='M176 80h112l112 112v240c0 26.5-21.5 48-48 48H176c-26.5 0-48-21.5-48-48V128c0-26.5 21.5-48 48-48zm32 112v64h64v-64h-64zm0 96v64h64v-64h-64zm96-96v64h64v-64h-64zm0 96v64h64v-64h-64z' fill='%23ffffff'/%3E%3C/svg%3E",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "https://img.icons8.com/fluency/512/sim-card.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%232563eb'/%3E%3Cpath d='M176 80h112l112 112v240c0 26.5-21.5 48-48 48H176c-26.5 0-48-21.5-48-48V128c0-26.5 21.5-48 48-48zm32 112v64h64v-64h-64zm0 96v64h64v-64h-64zm96-96v64h64v-64h-64zm0 96v64h64v-64h-64z' fill='%23ffffff'/%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
