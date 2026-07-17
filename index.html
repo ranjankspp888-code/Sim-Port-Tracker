@@ -120,12 +120,13 @@
 
 <!-- MAIN APP -->
 <div id="main-app">
-    <!-- Updated Header Section -->
-    <header>
+    <!-- Updated Header Section with Info Icon -->
+    <header style="display: flex; justify-content: space-between; align-items: center;">
         <h1>
             <span style="color: #2563eb;">SimPort</span> 
             <span style="color: #16a34a;">Tracker</span>
         </h1>
+        <i class="fa-solid fa-circle-info" style="font-size: 1.5rem; color: #2563eb; cursor: pointer;" onclick="document.getElementById('about-modal').style.display='flex'"></i>
     </header>
 
     <main id="home" class="content-section active">
@@ -169,6 +170,26 @@
         <div class="nav-item" onclick="showTab('refer', this)"><i class="fa fa-gift"></i> Refer</div>
         <div class="nav-item" onclick="showTab('more', this)"><i class="fa fa-gear"></i> Manage</div>
     </nav>
+</div>
+
+<!-- About Page Modal -->
+<div id="about-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:100000; flex-direction:column;">
+    <header style="display: flex; align-items: center; gap: 15px; border-radius: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <i class="fa-solid fa-arrow-left" style="font-size: 1.5rem; color: var(--text); cursor: pointer;" onclick="document.getElementById('about-modal').style.display='none'"></i>
+        <h1 style="font-size: 1.5rem; margin: 0;">About App</h1>
+    </header>
+    <div style="padding: 20px;">
+        <div class="card" style="text-align: center;">
+            <i class="fa-solid fa-laptop-code" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 15px;"></i>
+            <h3 style="justify-content: center; border-bottom: none; margin-bottom: 5px; font-size: 1.2rem;">Development By Ranjan kumar</h3>
+            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fa-solid fa-envelope"></i> ranjankspp888@gmail.com
+            </p>
+            <p style="font-size: 0.95rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fa-solid fa-calendar-days"></i> App Created Date: 17 July 2026
+            </p>
+        </div>
+    </div>
 </div>
 
 <script>
